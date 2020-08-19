@@ -7,21 +7,21 @@ async function fetchData(url) {
         return err;
     }
 }
-async function getWeatherData(countryCode) {
+async function getWeatherData(lat,long) {
     try {
-        let url = countryCode;
+        let url = "https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+long+"&exclude=hourly,daily&appid=e607e39f75c1c7526deb060ba1d50024";
         var data = await fetchData(url);
-        var realWeatherData = data.json();
+        var realWeatherData = data;
         return realWeatherData;
     }
     catch (err) {
         return err;
     }
 }
- 
+
 fetchData('https://restcountries.eu/rest/v2/all').then(function (countriesData) {
     //console.log(countriesData[0]["name"]);
-    
+
     let len = countriesData.length;
 
     var containerDiv = document.createElement('div');
@@ -48,9 +48,22 @@ fetchData('https://restcountries.eu/rest/v2/all').then(function (countriesData) 
         cardTitle.setAttribute('class', 'card-title');
         cardTitle.innerText = countriesData[i]["name"];
 
+        let latitude = countriesData[i]['latlng'][0];
+        let longitude = countriesData[i]['latlng'][1];
+
         var detailsCountry = document.createElement('p');
         detailsCountry.setAttribute('class', 'card-text');
         detailsCountry.innerHTML = "Region : " + countriesData[i]['region'] + "<br>" + detailsCountry.innerText + "<br>Capital : " + countriesData[i]['capital'] + "<br>" + detailsCountry.innerText + "Country code : " + countriesData[i]['alpha3Code'];
+        
+        var lat = document.createElement('p');
+        lat.setAttribute('class', 'card-text');
+        lat.id = latitude;
+        lat.innerHTML = "Latitude : " + latitude;
+
+        var long = document.createElement('p');
+        long.setAttribute('class', 'card-text');
+        long.id = longitude;
+        long.innerHTML = "Longitude :" + longitude;
 
         let btnCheckWeather = document.createElement('button');
         btnCheckWeather.setAttribute('class', 'btn btn-primary');
@@ -63,15 +76,16 @@ fetchData('https://restcountries.eu/rest/v2/all').then(function (countriesData) 
 
 
         divBody.appendChild(detailsCountry);
+        divBody.appendChild(lat);
+        divBody.appendChild(long);
         divBody.appendChild(btnCheckWeather);
 
         btnCheckWeather.addEventListener('click', function () {
-            getWeatherData(btn.value).then(function (weatherData) {
-                alert(weatherData);
+            getWeatherData(latitude,longitude).then(function (weatherData) {
+                alert("Weather of Country : "+ countriesData[i]["name"] + " is "+ weatherData['current']['weather'][0]['description']);
+            }).catch(function (err) {
+                alert(err);
             })
-                .catch(function (err) {
-                    alert(err);
-                })
         });
         colDiv.appendChild(cardDiv);
         rowDiv.appendChild(colDiv);
